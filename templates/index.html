@@ -26,19 +26,14 @@
         <script>
       
           {% for marker in markers %}
-            {#
-            L.marker([{{ marker['lat'] }}, {{ marker['lon'] }}]).addTo(map)
-            .bindPopup("{{ marker['popup'] }}")
-            .openPopup();
-            #}
-            L.circleMarker([{{ marker['lat'] }}, {{ marker['lon'] }}], {
-                color: 'blue',
+            L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
+                color: {{marker['color']|safe}},
                 weight: 1,
-                fillColor: 'blue',
+                fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
                 radius: 4
             }).addTo(map)
-            .bindPopup("{{ marker['popup'] }}")
+            .bindPopup("{{marker['popup']}}")
             .on('mouseover', function (e) {
                 this.openPopup();
                 })
