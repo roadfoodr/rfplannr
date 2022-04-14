@@ -10,7 +10,9 @@ GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')
 def inject_global_vars():
     return {'GA_TRACKING_ID': GA_TRACKING_ID}
 
-REGIONS = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
+STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA', 'HI']
+# STATE_STRING = ', '.join(f'"{r}"' for r in STATES)
+# STATES = []  # null list to select everything
 FILE_BASE = 'Roadfood_MDP_041122_GEO'
 DB_NAME = 'roadfood'
 DATABASE = os.path.join(app.root_path, 'data', f'{FILE_BASE}.sqlite')
@@ -33,9 +35,15 @@ def get_rows(limit=None):
     limit_str = f' LIMIT {limit}' if limit else ''
     cols = ['Restaurant', 'Checkmark', 'lat', 'long', 'Crossout']
     col_string = ', '.join(cols)
+    # expand the necessary number of qmarks, or use the column name to get all
+    state_qmarks = f"({', '.join('?' for _ in STATES)})" if STATES else '(State)'
+   
+    sql = f'SELECT {col_string} FROM {DB_NAME} ' \
+          f'WHERE State IN {state_qmarks}' \
+          f'{limit_str}'
     
-    cursor = get_db().cursor()
-    cursor.execute(f'SELECT {col_string} FROM {DB_NAME}{limit_str}')
+    cursor = get_db().cursor()   
+    cursor.execute(sql, STATES)
     items = cursor.fetchall()
     return items
 
