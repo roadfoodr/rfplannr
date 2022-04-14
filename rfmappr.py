@@ -22,6 +22,8 @@ def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
+        # return rows as dicts (allows access of fields via keys)
+        db.row_factory = sqlite3.Row
     return db
 
 @app.teardown_appcontext
@@ -60,10 +62,10 @@ def root():
     
     items = get_rows()  
     markers = [{
-                'lat': item[2],
-                'lon': item[3],
-                'popup': item[0],
-                'color': "'green'" if item[1] == 'y' else "'royalblue'"
-                } for item in items if item[2] and item[4] != 'y']
+                'lat': item['lat'],
+                'lon': item['long'],
+                'popup': item['Restaurant'],
+                'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'"
+                } for item in items if item['lat'] and item['Crossout'] != 'y']
     
     return render_template('index.html', markers=markers)
