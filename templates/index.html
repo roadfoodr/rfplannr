@@ -25,6 +25,7 @@
         <script src="{{ url_for('static', filename='js/universal.js') }}" /></script>
         <script>
       
+          var markerGroup = L.featureGroup()
           {% for marker in markers %}
             L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
                 color: {{marker['color']|safe}},
@@ -32,16 +33,19 @@
                 fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
                 radius: 4
-            }).addTo(map)
+            })
             .bindPopup("{{marker['popup']}}")
             .on('mouseover', function (e) {
                 this.openPopup();
                 })
             .on('mouseout', function (e) {
                 this.closePopup();
-                });
-
+                })
+            .addTo(markerGroup);
           {% endfor %}
+          
+          markerGroup.addTo(map);
+          map.flyToBounds(markerGroup.getBounds(), { padding: [25, 25] });
       
         </script>
     </body>
