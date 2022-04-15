@@ -10,9 +10,10 @@ GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')
 def inject_global_vars():
     return {'GA_TRACKING_ID': GA_TRACKING_ID}
 
-STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
-# STATE_STRING = ', '.join(f'"{r}"' for r in STATES)
-# STATES = []  # null list to select everything
+# STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
+# STATES = ['OK', 'TX']
+STATES = []  # null list to select everything
+
 FILE_BASE = 'Roadfood_MDP_041122_GEO'
 DB_NAME = 'roadfood'
 DATABASE = os.path.join(app.root_path, 'data', f'{FILE_BASE}.sqlite')

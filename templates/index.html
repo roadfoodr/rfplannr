@@ -24,10 +24,13 @@
         <div id="map"></div>
         <script src="{{ url_for('static', filename='js/universal.js') }}" /></script>
         <script>
-      
-          var markerGroup = L.featureGroup()
+          
+          var visitedLayer = L.layerGroup();
+          var unvisitedLayer = L.layerGroup();
+          {# feature group needed for getBounds() #}
+          var allMarkerGroup = L.featureGroup();
           {% for marker in markers %}
-            L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
+            M = L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
                 color: {{marker['color']|safe}},
                 weight: 1,
                 fillColor: {{marker['color']|safe}},
@@ -41,11 +44,25 @@
             .on('mouseout', function (e) {
                 this.closePopup();
                 })
-            .addTo(markerGroup);
+            .addTo(allMarkerGroup);
+            
+            if ({{marker['color']|safe}} == 'green') {
+                M.addTo(visitedLayer)
+            } else {
+                M.addTo(unvisitedLayer)
+            }
+            
           {% endfor %}
           
-          markerGroup.addTo(map);
-          map.flyToBounds(markerGroup.getBounds(), { padding: [25, 25] });
+          visitedLayer.addTo(map);
+          unvisitedLayer.addTo(map);
+          
+          controlBox = L.control.layers(null, null, { collapsed: false});
+          controlBox.addOverlay(visitedLayer, "visited");
+          controlBox.addOverlay(unvisitedLayer, "unvisited");
+          controlBox.addTo(map);
+
+          map.flyToBounds(allMarkerGroup.getBounds(), { padding: [25, 25] });
       
         </script>
     </body>

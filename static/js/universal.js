@@ -1,7 +1,6 @@
 // top, bottom, left, right = 49.382808, 24.521208, -66.945392, -124.736342
-var map = L.map('map', {zoomDelta: 0.25, zoomSnap: 0.1})
-    .fitBounds([ [49.382808, -66.945392], [24.521208, -124.736342] ])
-    .zoomIn(.25, animate=true);
+var map = L.map('map', {zoomDelta: 0.25, zoomSnap: .1})
+    .fitBounds([ [49.382808, -66.945392], [24.521208, -124.736342] ]);
 //    .setView([39.8283, -98.5795,], 4.5);
 
 var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
