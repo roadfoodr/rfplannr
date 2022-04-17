@@ -70,6 +70,8 @@
           controlBox.addOverlay(unvisitedLayer, "unvisited");
           controlBox.addTo(map);
 
+          L.control.scale({imperial: true, metric:false}).addTo(map);
+
           map.flyToBounds(allMarkerGroup.getBounds(), { padding: [25, 25] });
           {# required to enable map to handle keyboard commands right away #}          
           document.getElementById('map').focus();
