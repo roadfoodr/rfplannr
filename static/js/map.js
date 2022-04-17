@@ -8,6 +8,10 @@ var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 }).addTo(map);
 
 
+
+
+
+
 // https://www.section.io/engineering-education/how-to-build-a-real-time-location-tracker-using-leaflet-js/
 /*
 function getPosition(position) {

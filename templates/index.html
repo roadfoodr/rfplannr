@@ -22,20 +22,28 @@
     </head>
     <body>
         <div id="map"></div>
-        <script src="{{ url_for('static', filename='js/universal.js') }}" /></script>
+        <script src="{{ url_for('static', filename='js/map.js') }}" /></script>
+        <script src="{{ url_for('static', filename='js/hashids.js') }}" /></script>
+        {# see https://stackoverflow.com/questions/21626048/unable-to-pass-jinja2-variables-into-javascript-snippet #}
+        <script type="text/javascript">
+          const export_url = JSON.parse(
+              '{{url_for('export_selection', hashid='', _external=True) | tojson}}');
+        </script>
+        <script src="{{ url_for('static', filename='js/kbcommands.js') }}" /></script>
         <script>
           
           var visitedLayer = L.layerGroup();
           var unvisitedLayer = L.layerGroup();
           {# feature group needed for getBounds() #}
-          var allMarkerGroup = L.featureGroup();
+          var allMarkerGroup = L.featureGroup({bubblingMouseEvents: true});
           {% for marker in markers %}
             M = L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
                 color: {{marker['color']|safe}},
                 weight: 1,
                 fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
-                radius: 4
+                radius: 4,
+                ID: {{marker['ID']}}
             })
             .bindPopup("{{marker['popup']}}")
             .on('mouseover', function (e) {
@@ -63,8 +71,10 @@
           controlBox.addTo(map);
 
           map.flyToBounds(allMarkerGroup.getBounds(), { padding: [25, 25] });
-      
-        </script>
+          {# required to enable map to handle keyboard commands right away #}          
+          document.getElementById('map').focus();
+        </script>        
+        
     </body>
 
 </html>
