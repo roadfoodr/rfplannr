@@ -10,6 +10,8 @@ GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')
 @app.context_processor
 def inject_global_vars():
     return {'GA_TRACKING_ID': GA_TRACKING_ID}
+app.jinja_env.lstrip_blocks = True
+app.jinja_env.trim_blocks = True
 
 # STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
 # STATES = ['OK', 'TX']

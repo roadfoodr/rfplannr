@@ -54,11 +54,11 @@
                 })
             .addTo(allMarkerGroup);
             
-            if ({{marker['color']|safe}} == 'green') {
-                M.addTo(visitedLayer)
-            } else {
-                M.addTo(unvisitedLayer)
-            }
+            {% if marker['color']|safe == "'green'" %}
+                M.addTo(visitedLayer);
+            {% else %}
+                M.addTo(unvisitedLayer);
+            {% endif %}
             
           {% endfor %}
           
