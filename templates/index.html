@@ -29,7 +29,7 @@
           const export_url = JSON.parse(
               '{{url_for('export_selection', hashid='', _external=True) | tojson}}');
         </script>
-        <script src="{{ url_for('static', filename='js/kbcommands.js') }}" /></script>
+        <script src="{{ url_for('static', filename='js/uicommands.js') }}" /></script>
         <script>
           
           var visitedLayer = L.layerGroup();
@@ -38,6 +38,7 @@
           var allMarkerGroup = L.featureGroup({bubblingMouseEvents: true});
           {% for marker in markers %}
             M = L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
+                ID: {{marker['ID']}},
                 color: {{marker['color']|safe}},
                 weight: 1,
                 fillColor: {{marker['color']|safe}},
@@ -46,15 +47,17 @@
                 {% if marker['honor-roll']|safe == 'y' %}
                     className: 'honor-roll',
                 {% endif %}
-                ID: {{marker['ID']}}
+                originalColor: {{marker['color']|safe}},
+                selected: 'no',
             })
             .bindPopup("{{marker['popup']}}")
-            .on('mouseover', function (e) {
+            .on('mouseover', function(e) {
                 this.openPopup();
                 })
-            .on('mouseout', function (e) {
+            .on('mouseout', function(e) {
                 this.closePopup();
                 })
+            .on('click', clickselect)
             .addTo(allMarkerGroup);
             
             {% if marker['color']|safe == "'green'" %}
