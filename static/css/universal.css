@@ -2,7 +2,38 @@ body {
     padding: 0;
     margin: 0;
 }
+
 html, body, #map {
     height: 100%;
     width: 100vw;
 }
+
+/*
+.shadow-black {
+  filter: drop-shadow( 3px 3px 3px #000 );
+}
+*/
+
+.honor-roll {
+  outline: medium dotted orange;
+  outline-offset: 2.5px;
+  border-radius: 50%;
+}
+
+/*
+.honor-roll-anim {
+  animation: honor-roll-anim .5s ease-in-out infinite alternate;
+}
+
+@keyframes honor-roll-anim {
+  from {
+    filter: drop-shadow( 0 0 1px #e6e500) drop-shadow( 0 0 3px #e6e500);
+  }
+
+  to {
+    
+    filter: drop-shadow( 0 0 3px #e6e500) drop-shadow( 0 0 5px #e6e500);
+  }
+}
+
+*/

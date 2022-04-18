@@ -43,6 +43,9 @@
                 fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
                 radius: 4,
+                {% if marker['honor-roll']|safe == 'y' %}
+                    className: 'honor-roll',
+                {% endif %}
                 ID: {{marker['ID']}}
             })
             .bindPopup("{{marker['popup']}}")

@@ -14,7 +14,7 @@ app.jinja_env.lstrip_blocks = True
 app.jinja_env.trim_blocks = True
 
 # STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
-# STATES = ['OK', 'TX']
+# STATES = ['OK', 'TX', 'NM']
 STATES = []  # null list to select everything
 
 FILE_BASE = 'Roadfood_MDP_041622_GEO'
@@ -51,7 +51,7 @@ def close_connection(exception):
 
 def get_rows(limit=None, hashid=None):
     limit_str = f' LIMIT {limit}' if limit else ''
-    cols = ['ID', 'Restaurant', 'Checkmark', 'lat', 'long', 'Crossout']
+    cols = ['ID', 'Restaurant', 'Checkmark', 'lat', 'long', 'Crossout', '"Honor Roll"']
     col_string = ', '.join(cols)
     # expand the necessary number of qmarks, or use the column name to get all
     state_qmarks = f"({', '.join('?' for _ in STATES)})" if STATES else '(State)'
@@ -77,7 +77,8 @@ def root(limit=None, hashid=None):
                 'lat': item['lat'],
                 'lon': item['long'],
                 'popup': item['Restaurant'],
-                'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'"
+                'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
+                'honor-roll': item['Honor Roll']
                 } for item in items if item['lat'] and item['Crossout'] != 'y']
     
     return render_template('index.html', markers=markers)
