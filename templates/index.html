@@ -72,6 +72,8 @@
           unvisitedLayer.addTo(map);
           
           controlBox = L.control.layers(null, null, { collapsed: false});
+          controlBox.addBaseLayer(CartoDB_Voyager, "map style 1");
+          controlBox.addBaseLayer(OpenStreetMap, "map style 2");
           controlBox.addOverlay(visitedLayer, "visited");
           controlBox.addOverlay(unvisitedLayer, "unvisited");
           controlBox.addTo(map);
