@@ -33,9 +33,12 @@
         <script>
           
           var visitedLayer = L.layerGroup();
+          allLayerGroups.push(visitedLayer);
           var unvisitedLayer = L.layerGroup();
+          allLayerGroups.push(unvisitedLayer);
           {# feature group needed for getBounds() #}
-          var allMarkerGroup = L.featureGroup({bubblingMouseEvents: true});
+          var allMarkerGroup = L.featureGroup();
+          allLayerGroups.push(allMarkerGroup);
           {% for marker in markers %}
             M = L.circleMarker([{{marker['lat']}}, {{marker['lon']}}], {
                 ID: {{marker['ID']}},

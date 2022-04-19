@@ -3,6 +3,9 @@ var map = L.map('map', {zoomDelta: 0.25, zoomSnap: .1})
     .fitBounds([ [49.382808, -66.945392], [24.521208, -124.736342] ]);
 //    .setView([39.8283, -98.5795,], 4.5);
 
+allLayerGroups = [];
+allLayerGroups.push(map);
+
 var OpenStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);

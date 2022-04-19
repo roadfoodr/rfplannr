@@ -1,11 +1,15 @@
-// map.on('keypress', function(){alert("You clicked the map");});
-map
-//    .on('click', function(e){console.log(e);})
-    .on('keypress', function(e){keypress(e);});
-
+map.on('keypress', function(e){keypress(e);});
 
 const keyHash = 'H';
+const keyDelete = 'D';
+const keyDeleteNotVisible = 'V';
 const colorSelected = 'crimson';
+
+function deleteFromAllLayers(marker){
+            allLayerGroups.forEach(function(layer){
+                marker.removeFrom(layer);
+            });
+}
 
 
 function keypress(e) {
@@ -15,7 +19,6 @@ function keypress(e) {
 
     if (key == keyHash) {
         var hashids = new Hashids();
-//        console.log(hashids.encode(347, 1, 2, 3, 4));
         
         var ids = [];
         allMarkerGroup.eachLayer(function(marker){
@@ -25,7 +28,25 @@ function keypress(e) {
         
         console.log(export_url);
         window.location.replace(export_url+hashid);
-        }
+    }
+    
+    else if (key == keyDelete) {
+        allMarkerGroup.eachLayer(function(marker){
+            if (marker.options.selected == 'yes'){
+                deleteFromAllLayers(marker);
+            }
+        });
+    }
+        
+    else if (key == keyDeleteNotVisible) {
+        mapBounds = map.getBounds();
+        allMarkerGroup.eachLayer(function(marker){
+            if (!mapBounds.contains(marker.getLatLng()) || !map.hasLayer(marker)){
+                deleteFromAllLayers(marker);
+            }
+        });
+    }
+
 }
 
 function clickselect(e) {
