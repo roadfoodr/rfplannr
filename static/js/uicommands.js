@@ -1,8 +1,11 @@
 map.on('keypress', function(e){keypress(e);});
 
-const keyHash = 'H';
-const keyDelete = 'D';
+const keyHash = 'h';
+const keyHelp = 'H';
+const keyHelp2 = '?';
+const keyDelete = 'R';
 const keyDeleteNotVisible = 'V';
+const keyExport = 'X';
 const colorSelected = 'crimson';
 
 function deleteFromAllLayers(marker){
@@ -17,7 +20,11 @@ function keypress(e) {
     var key = e.originalEvent.key;
     console.log(key);
 
-    if (key == keyHash) {
+    if (key == keyHelp || key==keyHelp2) {
+        displayHelp(null, map);
+    }
+    
+    else if (key == keyHash) {
         var hashids = new Hashids();
         
         var ids = [];
