@@ -1,3 +1,4 @@
 flask
 hashids
+flask-table
 gunicorn

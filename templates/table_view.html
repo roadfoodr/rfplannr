@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Roadfood Trip Planner</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" 
+            integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" 
+            crossorigin="anonymous">
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" 
+    href="https://cdn.datatables.net/v/dt/jq-3.6.0/dt-1.11.5/fc-4.0.2/datatables.min.css"/>
+
+  </head>
+  <body>
+  
+  Here is the table
+  
+    {# https://flask-table.readthedocs.io/en/stable/#quick-start #}
+    {{ table }}
+
+    {# https://datatables.net/ #}
+    <script type="text/javascript" 
+    src="https://cdn.datatables.net/v/dt/jq-3.6.0/dt-1.11.5/fc-4.0.2/datatables.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        $('#data').DataTable( {
+            "pageLength": 15
+        });
+      });
+    </script>
+    <ul>
+    <li><a href="{{ url_for('recall_selection', hashid=hashid) }}">
+        Permalink</a> to map view for this selection</li>
+    <li><a href="{{ url_for('export_selection', hashid=hashid) }}">
+        Permalink</a> to table view for this selection</li>
+    </ul>
+  </body>
+</html>

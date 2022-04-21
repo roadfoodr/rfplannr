@@ -14,7 +14,6 @@ function deleteFromAllLayers(marker){
             });
 }
 
-
 function keypress(e) {
     console.log(e.originalEvent);
     var key = e.originalEvent.key;
@@ -24,7 +23,7 @@ function keypress(e) {
         displayHelp(null, map);
     }
     
-    else if (key == keyHash) {
+    else if (key == keyExport) {
         var hashids = new Hashids();
         
         var ids = [];
