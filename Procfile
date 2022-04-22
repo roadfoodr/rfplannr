@@ -1,1 +1,1 @@
-web: gunicorn -w 1 rfmappr:app
+web: gunicorn -w 1 rfplannr:app

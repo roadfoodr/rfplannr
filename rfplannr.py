@@ -15,8 +15,8 @@ app.jinja_env.lstrip_blocks = True
 app.jinja_env.trim_blocks = True
 
 # STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
-STATES = ['OK', 'TX', 'NM']
-# STATES = []  # null list to select everything
+# STATES = ['OK', 'TX', 'NM']
+STATES = []  # null list to select everything
 
 FILE_BASE = 'rfplannr'
 DB_NAME = 'roadfood'
@@ -84,7 +84,7 @@ def root(limit=None, hashid=None):
                 'honor-roll': item['Honor Roll']
                 } for item in items if item['lat'] and item['Crossout'] != 'y']
     
-    return render_template('index.html', markers=markers)
+    return render_template('map.html', markers=markers)
 
 @app.route('/<string:hashid>')
 def recall_selection(hashid):
