@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta name="description" content="">
         <title>Rfplannr</title>
         <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" 
@@ -33,7 +33,7 @@
         </script>
         <script src="{{ url_for('static', filename='js/uicommands.js') }}" /></script>
         <script>
-          
+          var MOBILE = L.Browser.mobile ? true : false;
           var visitedLayer = L.layerGroup();
           allLayerGroups.push(visitedLayer);
           var unvisitedLayer = L.layerGroup();
@@ -48,7 +48,7 @@
                 weight: 1,
                 fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
-                radius: 4,
+                radius: 5,
                 {% if marker['honor-roll']|safe == 'y' %}
                     className: 'honor-roll',
                 {% endif %}
