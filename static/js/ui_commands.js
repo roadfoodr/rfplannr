@@ -15,7 +15,7 @@ function deleteFromAllLayers(marker){
 }
 
 function uiHelp(){
-    uiHelp(null, map);
+    displayHelp(null, map);
 }
 
 function uiExport(){
