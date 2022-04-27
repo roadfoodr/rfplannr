@@ -14,45 +14,57 @@ function deleteFromAllLayers(marker){
             });
 }
 
+function uiHelp(){
+    uiHelp(null, map);
+}
+
+function uiExport(){
+    var hashids = new Hashids();
+    
+    var ids = [];
+    allMarkerGroup.eachLayer(function(marker){
+        ids.push(marker.options.ID);
+        });
+    var hashid = hashids.encode(ids)
+    
+    console.log(export_url);
+    window.location.replace(export_url+hashid);
+}
+
+function uiDelete(){
+    allMarkerGroup.eachLayer(function(marker){
+        if (marker.options.selected == 'yes'){
+            deleteFromAllLayers(marker);
+        }
+    });
+}
+
+function uiDeleteNotVisible(){
+    mapBounds = map.getBounds();
+    allMarkerGroup.eachLayer(function(marker){
+        if (!mapBounds.contains(marker.getLatLng()) || !map.hasLayer(marker)){
+            deleteFromAllLayers(marker);
+        }
+    });
+}
+
 function keypress(e) {
     console.log(e.originalEvent);
     var key = e.originalEvent.key;
     console.log(key);
 
     if (key == keyHelp || key==keyHelp2) {
-        displayHelp(null, map);
+        uiHelp();
     }
-    
     else if (key == keyExport) {
-        var hashids = new Hashids();
-        
-        var ids = [];
-        allMarkerGroup.eachLayer(function(marker){
-            ids.push(marker.options.ID);
-            });
-        var hashid = hashids.encode(ids)
-        
-        console.log(export_url);
-        window.location.replace(export_url+hashid);
+        uiExport();
     }
-    
     else if (key == keyDelete) {
-        allMarkerGroup.eachLayer(function(marker){
-            if (marker.options.selected == 'yes'){
-                deleteFromAllLayers(marker);
-            }
-        });
+        uiDelete();
     }
-        
     else if (key == keyDeleteNotVisible) {
-        mapBounds = map.getBounds();
-        allMarkerGroup.eachLayer(function(marker){
-            if (!mapBounds.contains(marker.getLatLng()) || !map.hasLayer(marker)){
-                deleteFromAllLayers(marker);
-            }
-        });
+         uiDeleteNotVisible();
     }
-
 }
 
 function clickselect(e) {
