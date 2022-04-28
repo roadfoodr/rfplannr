@@ -8,6 +8,10 @@ html, body, #map {
     width: 100vw;
 }
 
+.marker-popup {
+  text-align: center;
+}
+
 /*
 .shadow-black {
   filter: drop-shadow( 3px 3px 3px #000 );

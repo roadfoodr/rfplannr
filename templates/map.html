@@ -57,7 +57,7 @@
                 originalColor: {{marker['color']|safe}},
                 selected: 'no',
             })
-            .bindPopup("{{marker['popup']}}")
+            .bindPopup("<div class='marker-popup'>{{marker['popup']|safe}}</div>")
             .on('mouseover', function(e) {
                 this.openPopup();
                 })

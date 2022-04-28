@@ -79,7 +79,9 @@ def root(limit=None, hashid=None):
                 'ID': item['ID'],
                 'lat': item['lat'],
                 'lon': item['long'],
-                'popup': item['Restaurant'],
+                'popup': f"<strong>{item['Restaurant']}</strong>"
+                         f"<br>{item['City']}, {item['State']}"
+                         f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}",
                 'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
                 'honor-roll': item['Honor Roll']
                 } for item in items if item['lat'] and item['Crossout'] != 'y']
