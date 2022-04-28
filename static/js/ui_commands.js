@@ -1,12 +1,16 @@
 map.on('keypress', function(e){keypress(e);});
 
-const keyHash = 'h';
 const keyHelp = 'H';
 const keyHelp2 = '?';
 const keyDelete = 'R';
 const keyDeleteNotVisible = 'V';
 const keyExport = 'X';
 const colorSelected = 'crimson';
+
+var deletedPopup = L.popup().setContent('0 markers removed');
+function displayDeleted(btn, map){
+    deletedPopup.setLatLng(map.getCenter()).openOn(map);
+}
 
 function deleteFromAllLayers(marker){
             allLayerGroups.forEach(function(layer){
@@ -32,20 +36,34 @@ function uiExport(){
 }
 
 function uiDelete(){
+    var markers_deleted = 0;
     allMarkerGroup.eachLayer(function(marker){
         if (marker.options.selected == 'yes'){
             deleteFromAllLayers(marker);
+            markers_deleted++;
         }
     });
+    if (markers_deleted > 0){
+        deletedPopup.setContent(
+            `${markers_deleted} marker${markers_deleted==1 ? '':'s'} removed`);
+        displayDeleted(null, map);
+    }
 }
 
 function uiDeleteNotVisible(){
+    var markers_deleted = 0;
     mapBounds = map.getBounds();
     allMarkerGroup.eachLayer(function(marker){
         if (!mapBounds.contains(marker.getLatLng()) || !map.hasLayer(marker)){
             deleteFromAllLayers(marker);
+            markers_deleted++;
         }
     });
+    if (markers_deleted > 0){
+        deletedPopup.setContent(
+            `${markers_deleted} marker${markers_deleted==1 ? '':'s'} removed`);
+        displayDeleted(null, map);
+    }
 }
 
 function keypress(e) {
