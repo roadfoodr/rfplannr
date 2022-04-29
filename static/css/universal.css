@@ -12,32 +12,37 @@ html, body, #map {
   text-align: center;
 }
 
-/*
-.shadow-black {
-  filter: drop-shadow( 3px 3px 3px #000 );
-}
-*/
-
 .honor-roll {
   outline: medium dotted orange;
   outline-offset: 2.5px;
   border-radius: 50%;
 }
 
-/*
-.honor-roll-anim {
-  animation: honor-roll-anim .5s ease-in-out infinite alternate;
+.center {
+    justify-content: center;
 }
 
-@keyframes honor-roll-anim {
-  from {
-    filter: drop-shadow( 0 0 1px #e6e500) drop-shadow( 0 0 3px #e6e500);
-  }
-
-  to {
-    
-    filter: drop-shadow( 0 0 3px #e6e500) drop-shadow( 0 0 5px #e6e500);
-  }
+.splash {
+    margin-top: 7.5%;
+    text-align: center;
 }
 
-*/
+p {
+    margin: 7.5% 0 7.5% 0;
+}
+
+ul.instructions {
+    font-size: 90%;
+    padding-left: 12.5%;
+    padding-right: 5%;
+}
+
+.pure-form input[type=text] {
+    display: inline-block;
+    margin: 0 5px 0 0;
+}
+
+.pure-form button[type=submit] {
+    display: inline-block;
+    margin: 0;
+}

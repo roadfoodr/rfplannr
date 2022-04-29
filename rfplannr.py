@@ -1,22 +1,20 @@
-from flask import Flask, render_template, g
+from flask import Flask, g, redirect, render_template, request, url_for
 import os
 import sqlite3
+import sys
+import re
 from hashids import Hashids
 from flask_table import Col, create_table
 
 app = Flask(__name__)
 app.app_context().push()
-app.secret_key = os.environ.get('SECRET_KEY', 'dev')
+# app.secret_key = os.environ.get('SECRET_KEY', 'dev')
 GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')
 @app.context_processor
 def inject_global_vars():
     return {'GA_TRACKING_ID': GA_TRACKING_ID}
 app.jinja_env.lstrip_blocks = True
 app.jinja_env.trim_blocks = True
-
-# STATES = ['VA', 'NC', 'TN', 'SC', 'GA', 'AL', 'MS', 'LA']
-# STATES = ['OK', 'TX', 'NM']
-STATES = []  # null list to select everything
 
 FILE_BASE = 'rfplannr'
 DB_NAME = 'roadfood'
@@ -65,16 +63,23 @@ def get_rows(states=None, limit=None, hashid=None):
           f'WHERE State IN {state_qmarks} ' \
           f'AND ID IN {ids_qmarks}' \
           f'{limit_str}'
-
+    print(sql, file=sys.stdout)
+    sys.stdout.flush()
+          
     cursor = get_db().cursor()   
     cursor.execute(sql, list(states)+list(ids))
     items = cursor.fetchall()
     return items
 
+#%% Routes
 
 @app.route('/')
-def root(limit=None, hashid=None):    
-    items = get_rows(STATES, limit, hashid)  
+def show_form():
+    return render_template('index.html')
+
+@app.route('/map', methods=['GET'])
+def root(states=None, limit=None, hashid=None):
+    items = get_rows(states, limit, hashid)  
     markers = [{
                 'ID': item['ID'],
                 'lat': item['lat'],
@@ -85,14 +90,20 @@ def root(limit=None, hashid=None):
                 'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
                 'honor-roll': item['Honor Roll']
                 } for item in items if item['lat'] and item['Crossout'] != 'y']
-    
     return render_template('map.html', markers=markers)
 
-@app.route('/<string:hashid>')
-def recall_selection(hashid):
-    return root(limit=None, hashid=hashid)
+@app.route('/map', methods=['POST'])
+def filter_states():
+    state_string = request.form['submit-states'].upper()
+    states = re.split('[^A-Z]', state_string)
+    states = list(filter(None, states))
+    return root(states=states)
 
-@app.route('/export/<string:hashid>')
+@app.route('/map/<string:hashid>')
+def recall_selection(hashid):
+    return root(states=None, limit=None, hashid=hashid)
+
+@app.route('/table/<string:hashid>')
 def export_selection(hashid):   
     export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
 
@@ -106,5 +117,4 @@ def export_selection(hashid):
                       thead_classes=['thead-dark'])
 
     return render_template("table_view.html", hashid=hashid, table=table)
-
 

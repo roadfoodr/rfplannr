@@ -1,5 +1,4 @@
 {% block ga_tracking %}
-
 {% if GA_TRACKING_ID != 'dev' %}
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id={{GA_TRACKING_ID}}"></script>
@@ -11,14 +10,4 @@
   gtag('config', '{{GA_TRACKING_ID}}');
 </script>
 {% endif %}
-
 {% endblock %}
-
-
-
-
- 
- 
- 
- 
-
