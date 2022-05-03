@@ -63,8 +63,6 @@ def get_rows(states=None, limit=None, hashid=None):
           f'WHERE State IN {state_qmarks} ' \
           f'AND ID IN {ids_qmarks}' \
           f'{limit_str}'
-    print(sql, file=sys.stdout)
-    sys.stdout.flush()
           
     cursor = get_db().cursor()   
     cursor.execute(sql, list(states)+list(ids))
@@ -74,7 +72,7 @@ def get_rows(states=None, limit=None, hashid=None):
 #%% Routes
 
 @app.route('/')
-def show_form():
+def home_page():
     return render_template('index.html')
 
 @app.route('/map', methods=['GET'])

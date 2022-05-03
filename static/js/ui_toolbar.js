@@ -6,6 +6,7 @@ var helpContent = `
     <li><strong>${keyDelete}</strong> or <i class="fa-regular fa-trash-can"></i>: remove selected markers</li>
     <li><strong>${keyDeleteNotVisible}</strong> or <i class="fa-solid fa-trash-can"></i>: remove all markers not currently visible on map</li>
     <li><strong>${keyExport}</strong> or <i class="fa-solid fa-table-list"></i>: table view of current markers with spreadsheet export</li>
+    <li><strong>${keyHome}</strong> or <i class="fa-solid fa-house"></i>: start over from home page (current selection will be lost)</li>
     <li><strong>${keyHelp}</strong> or <strong>${keyHelp2}</strong> or <i class="fa-solid fa-question"></i>: display this help popup</li>
     </ul>
     <ul style="list-style: none;">    
@@ -20,7 +21,9 @@ function displayHelp(btn, map){
     helpPopup.setLatLng(map.getCenter()).openOn(map);
 }
 
-var buttons = [ L.easyButton('fa-regular fa-trash-can', uiDelete, 
+var buttons = [ L.easyButton('fa-solid fa-house', uiHome, 
+                    'Start over from home page (current selection will be lost)'),
+                L.easyButton('fa-regular fa-trash-can', uiDelete, 
                     'Remove selected markers'),
                 L.easyButton('fa-solid fa-trash-can', uiDeleteNotVisible, 
                     'Remove all markers not currently visible on map'),

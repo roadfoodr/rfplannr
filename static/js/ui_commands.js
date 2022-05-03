@@ -1,6 +1,7 @@
 map.on('keypress', function(e){keypress(e);});
 
-const keyHelp = 'H';
+const keyHome = 'H';
+const keyHelp = 'h';
 const keyHelp2 = '?';
 const keyDelete = 'R';
 const keyDeleteNotVisible = 'V';
@@ -22,6 +23,10 @@ function uiHelp(){
     displayHelp(null, map);
 }
 
+function uiHome(){
+    window.location.replace(home_url);
+}
+
 function uiExport(){
     var hashids = new Hashids();
     
@@ -31,7 +36,6 @@ function uiExport(){
         });
     var hashid = hashids.encode(ids)
     
-    console.log(export_url);
     window.location.replace(export_url+hashid);
 }
 
@@ -69,10 +73,12 @@ function uiDeleteNotVisible(){
 function keypress(e) {
     console.log(e.originalEvent);
     var key = e.originalEvent.key;
-    console.log(key);
 
     if (key == keyHelp || key==keyHelp2) {
         uiHelp();
+    }
+    else if (key == keyHome) {
+        uiHome();
     }
     else if (key == keyExport) {
         uiExport();
