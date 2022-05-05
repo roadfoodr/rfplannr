@@ -3,6 +3,7 @@ import os
 import sqlite3
 import sys
 import re
+import urllib.parse as urlparse
 from hashids import Hashids
 from flask_table import Col, create_table
 
@@ -77,12 +78,18 @@ def home_page():
 
 @app.route('/map', methods=['GET'])
 def root(states=None, limit=None, hashid=None):
-    items = get_rows(states, limit, hashid)  
+    items = get_rows(states, limit, hashid)
+    goog_prefix = 'https://google.com/search?q='
     markers = [{
                 'ID': item['ID'],
                 'lat': item['lat'],
                 'lon': item['long'],
-                'popup': f"<strong>{item['Restaurant']}</strong>"
+                'popup': f"<a href='{goog_prefix}{urlparse.quote_plus(item['Restaurant'])}"
+                         f"+{urlparse.quote_plus(item['City'])}"
+                         f"+{urlparse.quote_plus(item['State'])}"
+                         f"' target='_blank'>"
+                         f"<strong>{item['Restaurant']}</strong>"
+                         f"</a>"
                          f"<br>{item['City']}, {item['State']}"
                          f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}",
                 'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
