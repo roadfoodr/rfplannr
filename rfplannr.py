@@ -204,3 +204,7 @@ def export_selection(hashid=''):
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True)
 
+@app.errorhandler(404)
+def invalid_route(e):
+    return redirect(url_for('home_page'))
+
