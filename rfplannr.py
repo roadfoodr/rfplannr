@@ -176,10 +176,14 @@ def export_selection(hashid=''):
 
     hashid = 'ALL' if not hashid else hashid
     worksheet = workbook.add_worksheet('Permalinks')
-    worksheet.write(0, 0, "Permalink to map view for this selection:")
-    worksheet.write(1, 0, url_for('recall_selection', hashid=hashid, _external=True))       
-    worksheet.write(3, 0, "Permalink to table view for this selection:")
-    worksheet.write(4, 0, url_for('table_selection', hashid=hashid, _external=True))
+    
+    distinct_states = get_states(hashid)
+    worksheet.write(0, 0, "States represented in this selection:")
+    worksheet.write(1, 0, ", ".join(distinct_states))       
+    worksheet.write(3, 0, "Permalink to map view for this selection:")
+    worksheet.write(4, 0, url_for('recall_selection', hashid=hashid, _external=True))       
+    worksheet.write(6, 0, "Permalink to table view for this selection:")
+    worksheet.write(7, 0, url_for('table_selection', hashid=hashid, _external=True))
 
     workbook.close()
     output.seek(0)
@@ -188,7 +192,6 @@ def export_selection(hashid=''):
     date_string = date.today().strftime('%m%d%y')
 
     all_states = get_states('')
-    distinct_states = get_states(hashid)
     if len(distinct_states) == len(all_states):
         states_string = 'ALL'
     else:
