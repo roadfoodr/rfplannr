@@ -36,7 +36,7 @@ function uiExport(){
         });
     var hashid = hashids.encode(ids)
     
-    window.location.replace(export_url+hashid);
+    window.location.replace(table_url+hashid);
 }
 
 function uiDelete(){

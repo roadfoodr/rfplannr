@@ -1,4 +1,4 @@
-from flask import Flask, g, redirect, render_template, request, url_for
+from flask import Flask, g, redirect, render_template, request, url_for, send_file
 import os
 import sqlite3
 import sys
@@ -6,6 +6,10 @@ import re
 import urllib.parse as urlparse
 from hashids import Hashids
 from flask_table import Col, create_table
+from xlsxwriter.workbook import Workbook
+from io import BytesIO
+from datetime import date
+
 
 app = Flask(__name__)
 app.app_context().push()
@@ -70,6 +74,20 @@ def get_rows(states=None, limit=None, hashid=None):
     items = cursor.fetchall()
     return items
 
+def get_states(hashid=None):
+    ids = decode_hashid(hashid)
+    ids_qmarks = f"({', '.join('?' for _ in ids)})" if ids else '(ID)'
+
+    sql = f'SELECT DISTINCT State FROM {DB_NAME} ' \
+          f'WHERE ID IN {ids_qmarks}' \
+
+    cursor = get_db().cursor()
+    cursor.execute(sql, list(ids))
+    items = cursor.fetchall()
+    distinct_states = sorted([item['State'] for item in items])
+    return distinct_states
+
+
 #%% Routes
 
 @app.route('/')
@@ -104,16 +122,22 @@ def filter_states():
     states = list(filter(None, states))
     return root(states=states)
 
+@app.route('/map')
+def recall_selection_all(hashid='ALL'):
+    return recall_selection(hashid)
 @app.route('/map/<string:hashid>')
-def recall_selection(hashid):
+def recall_selection(hashid=''):
     return root(states=None, limit=None, hashid=hashid)
 
+@app.route('/table')
+def table_selection_all(hashid='ALL'):
+    return table_selection(hashid)
 @app.route('/table/<string:hashid>')
-def export_selection(hashid):   
-    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
+def table_selection(hashid=''):
+    table_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
 
     ItemTable = create_table('ItemTable')
-    for col_name in export_cols:
+    for col_name in table_cols:
         ItemTable.add_column(col_name, Col(col_name))
 
     items = get_rows(limit=None, hashid=hashid) 
@@ -122,4 +146,61 @@ def export_selection(hashid):
                       thead_classes=['thead-dark'])
 
     return render_template("table_view.html", hashid=hashid, table=table)
+
+@app.route('/export')
+def export_selection_all(hashid='ALL'):   
+    return export_selection(hashid)
+@app.route('/export/<string:hashid>')
+def export_selection(hashid=''):
+    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
+    export_col_widths = [35, 15, 6, 25, 10, 40]
+
+    items = get_rows(limit=None, hashid=hashid)
+
+    output = BytesIO()
+    workbook = Workbook(output)
+    # workbook.formats[0].font_name = 'Verdana'
+    # workbook.formats[0].font_size = 10
+
+    worksheet = workbook.add_worksheet('Locations')
+    # Add header row to workbook
+    format_bold = workbook.add_format({'bold': True})
+    for j, colname in enumerate(export_cols):
+        worksheet.write(0, j, colname, format_bold)
+        worksheet.set_column(j, j, export_col_widths[j])
+
+    header_offset = 1
+    for i, row in enumerate(items):
+        for j, colname in enumerate(export_cols):
+            worksheet.write(i+header_offset, j, row[colname])
+
+    hashid = 'ALL' if not hashid else hashid
+    worksheet = workbook.add_worksheet('Permalinks')
+    worksheet.write(0, 0, "Permalink to map view for this selection:")
+    worksheet.write(1, 0, url_for('recall_selection', hashid=hashid, _external=True))       
+    worksheet.write(3, 0, "Permalink to table view for this selection:")
+    worksheet.write(4, 0, url_for('table_selection', hashid=hashid, _external=True))
+
+    workbook.close()
+    output.seek(0)
+
+    # generate filename including date and states
+    date_string = date.today().strftime('%m%d%y')
+
+    all_states = get_states('')
+    distinct_states = get_states(hashid)
+    if len(distinct_states) == len(all_states):
+        states_string = 'ALL'
+    else:
+        max_filename_states = 5
+        states_string_suffix = ''
+        if len(distinct_states) > max_filename_states:
+            states_string_suffix = '-plus'
+            distinct_states = distinct_states[:max_filename_states]
+        states_string = "-".join(distinct_states) + states_string_suffix
+    
+    return send_file(output,
+                     attachment_filename=f'Roadfood_{date_string}-{states_string}.xlsx',
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     as_attachment=True)
 

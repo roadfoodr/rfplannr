@@ -1,4 +1,5 @@
 flask
 hashids
 flask-table
+xlsxwriter
 gunicorn

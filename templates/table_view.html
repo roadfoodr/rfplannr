@@ -38,8 +38,10 @@
     <ul>
     <li><a href="{{ url_for('recall_selection', hashid=hashid) }}">
         Permalink</a> to map view for this selection</li>
-    <li><a href="{{ url_for('export_selection', hashid=hashid) }}">
+    <li><a href="{{ url_for('table_selection', hashid=hashid) }}">
         Permalink</a> to table view for this selection</li>
+    <li><a href="{{ url_for('export_selection', hashid=hashid) }}">
+        Export</a> this selection as a spreadsheet file</li>
     </ul>
   </body>
 </html>

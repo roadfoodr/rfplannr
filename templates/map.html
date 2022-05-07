@@ -20,8 +20,8 @@
         <script src="{{ url_for('static', filename='js/hashids.js') }}" /></script>
         {# see https://stackoverflow.com/questions/21626048/unable-to-pass-jinja2-variables-into-javascript-snippet #}
         <script type="text/javascript">
-          const export_url = JSON.parse(
-              '{{url_for('export_selection', hashid='', _external=True) | tojson}}');
+          const table_url = JSON.parse(
+              '{{url_for('table_selection', hashid='', _external=True) | tojson}}');
           const home_url = JSON.parse(
               '{{url_for('home_page') | tojson}}');
         </script>
