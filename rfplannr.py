@@ -53,7 +53,7 @@ def close_connection(exception):
         db.close()
 
 
-def get_rows(states=None, limit=None, hashid=None):
+def get_rows(states=None, limit=None, hashid=None, include_crossout=False):
     states = [] if states is None else states
     limit_str = f' LIMIT {limit}' if limit else ''
     cols = ['ID', 'Restaurant', 'City', 'State', 'Address', 'Checkmark', 
@@ -63,11 +63,14 @@ def get_rows(states=None, limit=None, hashid=None):
     state_qmarks = f"({', '.join('?' for _ in states)})" if states else '(State)'
     ids = decode_hashid(hashid)
     ids_qmarks = f"({', '.join('?' for _ in ids)})" if ids else '(ID)'
+    crossout_string = "AND Crossout IS NOT 'y'" if not include_crossout else ''
     
     sql = f'SELECT {col_string} FROM {DB_NAME} ' \
           f'WHERE State IN {state_qmarks} ' \
-          f'AND ID IN {ids_qmarks}' \
-          f'{limit_str}'
+          f'AND ID IN {ids_qmarks} ' \
+          f'{crossout_string} ' \
+          f'{limit_str} ' \
+          f'ORDER BY State, City, Restaurant'
           
     cursor = get_db().cursor()   
     cursor.execute(sql, list(states)+list(ids))
@@ -109,10 +112,11 @@ def root(states=None, limit=None, hashid=None):
                          f"<strong>{item['Restaurant']}</strong>"
                          f"</a>"
                          f"<br>{item['City']}, {item['State']}"
-                         f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}",
+                         f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}"
+                         f"{'<br><strong>Permanently Closed</strong>' if item['Crossout'] == 'y' else ''}",
                 'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
                 'honor-roll': item['Honor Roll']
-                } for item in items if item['lat'] and item['Crossout'] != 'y']
+                } for item in items if item['lat'] ]
     return render_template('map.html', markers=markers)
 
 @app.route('/map', methods=['POST'])
