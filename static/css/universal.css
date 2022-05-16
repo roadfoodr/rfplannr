@@ -18,6 +18,12 @@ html, body, #map {
   border-radius: 50%;
 }
 
+.recommended {
+  outline: medium dotted OrangeRed;
+  outline-offset: 2.5px;
+  border-radius: 50%;
+}
+
 .center {
     justify-content: center;
 }

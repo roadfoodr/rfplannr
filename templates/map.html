@@ -43,8 +43,15 @@
                 fillColor: {{marker['color']|safe}},
                 fillOpacity: 0.5,
                 radius: 5,
-                {% if marker['honor-roll']|safe == 'y' %}
-                    className: 'honor-roll',
+                {%+ set classnames = [] -%}
+                {%- if marker['honor-roll']|safe == 'y' %}
+                    {{- classnames.append('honor-roll') or ''}}
+                {%- endif %}
+                {%- if marker['recommended']|safe == 'y' %}
+                    {{- classnames.append('recommended') or ''}}
+                {%- endif %}
+                {%- if classnames %}
+                    className: '{{ classnames|join(' ')}}',
                 {% endif %}
                 originalColor: {{marker['color']|safe}},
                 selected: 'no',
@@ -57,14 +64,14 @@
                 this.closePopup();
                 })
             .on('click', clickselect)
-            .addTo(allMarkerGroup);
-            
-            {% if marker['color']|safe == "'green'" %}
+            .addTo(allMarkerGroup);           
+
+            {%+ if marker['color']|safe == "'green'" -%}
                 M.addTo(visitedLayer);
-            {% else %}
+            {%+ else -%}
                 M.addTo(unvisitedLayer);
             {% endif %}
-            
+          
           {% endfor %}
           
           visitedLayer.addTo(map);

@@ -57,7 +57,7 @@ def get_rows(states=None, limit=None, hashid=None, include_crossout=False):
     states = [] if states is None else states
     limit_str = f' LIMIT {limit}' if limit else ''
     cols = ['ID', 'Restaurant', 'City', 'State', 'Address', 'Checkmark', 
-            'lat', 'long', 'Crossout', '"Honor Roll"', 'Notes']
+            'lat', 'long', 'Crossout', '"Honor Roll"', 'Recommend', 'Notes']
     col_string = ', '.join(cols)
     # expand the necessary number of qmarks, or use the column name to get all
     state_qmarks = f"({', '.join('?' for _ in states)})" if states else '(State)'
@@ -113,9 +113,12 @@ def root(states=None, limit=None, hashid=None):
                          f"</a>"
                          f"<br>{item['City']}, {item['State']}"
                          f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}"
+                         f"{'<br><em>Roadfoodr Recommended</em>' if item['Recommend'] == 'y' else ''}"
                          f"{'<br><strong>Permanently Closed</strong>' if item['Crossout'] == 'y' else ''}",
                 'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
-                'honor-roll': item['Honor Roll']
+                'honor-roll': item['Honor Roll'],
+                'recommended': item['Recommend'],
+                'closed': item['Crossout']
                 } for item in items if item['lat'] ]
     return render_template('map.html', markers=markers)
 
@@ -138,7 +141,7 @@ def table_selection_all(hashid='ALL'):
     return table_selection(hashid)
 @app.route('/table/<string:hashid>')
 def table_selection(hashid=''):
-    table_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
+    table_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Notes']
 
     ItemTable = create_table('ItemTable')
     for col_name in table_cols:
@@ -156,8 +159,8 @@ def export_selection_all(hashid='ALL'):
     return export_selection(hashid)
 @app.route('/export/<string:hashid>')
 def export_selection(hashid=''):
-    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Notes']
-    export_col_widths = [35, 15, 6, 25, 10, 40]
+    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Notes']
+    export_col_widths = [35, 15, 6, 25, 10, 10, 40]
 
     items = get_rows(limit=None, hashid=hashid)
 
