@@ -1,7 +1,8 @@
 from flask import Flask, g, redirect, render_template, request, url_for, send_file
+from flask_talisman import Talisman
 import os
 import sqlite3
-import sys
+# import sys
 import re
 import urllib.parse as urlparse
 from hashids import Hashids
@@ -12,6 +13,8 @@ from datetime import date
 
 
 app = Flask(__name__)
+# Wrap Flask app with Talisman
+Talisman(app, content_security_policy=None)
 app.app_context().push()
 # app.secret_key = os.environ.get('SECRET_KEY', 'dev')
 GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')

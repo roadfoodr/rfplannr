@@ -1,4 +1,5 @@
 flask
+flask-talisman
 hashids
 flask-table
 xlsxwriter
