@@ -213,7 +213,7 @@ def export_selection(hashid=''):
         states_string = "-".join(distinct_states) + states_string_suffix
     
     return send_file(output,
-                     attachment_filename=f'Roadfood_{date_string}-{states_string}.xlsx',
+                     download_name=f'Roadfood_{date_string}-{states_string}.xlsx',
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True)
 
