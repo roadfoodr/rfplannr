@@ -1,4 +1,7 @@
-flask
+# must be pinned no later than this version until
+# https://github.com/plumdog/flask_table/issues/137 is fixed
+flask==2.3.3
+
 flask-talisman
 hashids
 flask-table
