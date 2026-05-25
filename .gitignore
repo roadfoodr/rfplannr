@@ -21,6 +21,7 @@ __pycache__/
 # repo-specific
 ##################
 *API.txt
+.env
 wrangle/
 data/
 data_working/
