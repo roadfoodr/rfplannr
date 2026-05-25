@@ -23,10 +23,10 @@
                 {# The `data` parameter refers to the data for the column being targeted #}
                     "render": function ( data, type, row ) {
                         let goog_prefix = "https://google.com/search?q=";
-                        let goog_uri = `${goog_prefix}+${data}+${row[1]}+${row[2]}`;
+                        let goog_uri = `${goog_prefix}+${encodeURIComponent(data)}+${encodeURIComponent(row[1])}+${encodeURIComponent(row[2])}`;
                         let uri_prefix = '<a href="';
                         let uri_suffix = '" target="_blank">';
-                        let cell_html = `${uri_prefix}${encodeURI(goog_uri)}${uri_suffix}${data}</a>`
+                        let cell_html = `${uri_prefix}${goog_uri}${uri_suffix}${data}</a>`
                         return cell_html;
                     },
                 "targets": 0

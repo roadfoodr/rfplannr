@@ -21,3 +21,12 @@ __pycache__/
 # repo-specific
 ##################
 *API.txt
+wrangle/
+data/
+data_working/
+README_BUILD.txt
+TODO.md
+errlog.txt
+questions.txt
+*.tar
+*.tar.gz
