@@ -31,7 +31,8 @@
         </script>
         <script src="{{ url_for('static', filename='js/ui_commands.js') }}" /></script>
         <script>
-          var MOBILE = L.Browser.mobile ? true : false;
+          var MOBILE = L.Browser.mobile;
+          var _lastMobileTap = 0;
           var visitedLayer = L.layerGroup();
           allLayerGroups.push(visitedLayer);
           var unvisitedLayer = L.layerGroup();
@@ -64,12 +65,25 @@
             })
             .bindPopup("<div class='marker-popup'>{{marker['popup']|safe}}</div>")
             .on('mouseover', function(e) {
+                if (MOBILE) {
+                    var now = Date.now();
+                    if (now - _lastMobileTap < 500) return;
+                    _lastMobileTap = now;
+                    var marker = e.target;
+                    if (marker.options.color == colorSelected) {
+                        marker.setStyle({ color: marker.options.originalColor, fillColor: marker.options.originalColor });
+                        marker.options.selected = 'no';
+                    } else {
+                        marker.setStyle({ color: colorSelected, fillColor: colorSelected });
+                        marker.options.selected = 'yes';
+                    }
+                }
                 this.openPopup();
                 })
             .on('mouseout', function(e) {
-                this.closePopup();
+                if (!MOBILE) this.closePopup();
                 })
-            .on('click', clickselect)
+            .on('click', MOBILE ? function(){} : clickselect)
             .addTo(allMarkerGroup);           
 
             {%+ if marker['color']|safe == "'red'" -%}

@@ -6,7 +6,7 @@ const keyHelp2 = '?';
 const keyDelete = 'R';
 const keyDeleteNotVisible = 'V';
 const keyExport = 'X';
-const colorSelected = 'crimson';
+const colorSelected = 'darkorchid';
 
 var deletedPopup = L.popup().setContent('0 markers removed');
 function displayDeleted(btn, map){
