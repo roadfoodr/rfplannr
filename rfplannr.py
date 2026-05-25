@@ -73,7 +73,7 @@ def get_rows(states=None, limit=None, hashid=None, include_crossout=False):
           f'AND ID IN {ids_qmarks} ' \
           f'{crossout_string} ' \
           f'{limit_str} ' \
-          f'ORDER BY State, City, Restaurant'
+          f'ORDER BY State, Crossout, City, Restaurant'
           
     cursor = get_db().cursor()   
     cursor.execute(sql, list(states)+list(ids))
@@ -102,7 +102,7 @@ def home_page():
 
 @app.route('/map', methods=['GET'])
 def root(states=None, limit=None, hashid=None):
-    items = get_rows(states, limit, hashid)
+    items = get_rows(states, limit, hashid, include_crossout=True)
     goog_prefix = 'https://google.com/search?q='
     markers = [{
                 'ID': item['ID'],
@@ -118,7 +118,7 @@ def root(states=None, limit=None, hashid=None):
                          f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}"
                          f"{'<br><em>Roadfoodr Recommended</em>' if item['Recommend'] == 'y' else ''}"
                          f"{'<br><strong>Permanently Closed</strong>' if item['Crossout'] == 'y' else ''}",
-                'color': "'green'" if item['Checkmark'] == 'y' else "'royalblue'",
+                'color': "'red'" if item['Crossout'] == 'y' else ("'green'" if item['Checkmark'] == 'y' else "'royalblue'"),
                 'honor-roll': item['Honor Roll'],
                 'recommended': item['Recommend'],
                 'closed': item['Crossout']
@@ -149,8 +149,9 @@ def table_selection(hashid=''):
     ItemTable = create_table('ItemTable')
     for col_name in table_cols:
         ItemTable.add_column(col_name, Col(col_name))
+    ItemTable.add_column('Crossout', Col('Closed'))
 
-    items = get_rows(limit=None, hashid=hashid) 
+    items = get_rows(limit=None, hashid=hashid, include_crossout=True) 
     table = ItemTable(items, table_id='data', 
                       classes=['table', 'table-striped'],
                       thead_classes=['thead-dark'])
@@ -162,10 +163,10 @@ def export_selection_all(hashid='ALL'):
     return export_selection(hashid)
 @app.route('/export/<string:hashid>')
 def export_selection(hashid=''):
-    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Notes']
-    export_col_widths = [35, 15, 6, 25, 10, 10, 40]
+    export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Crossout', 'Notes']
+    export_col_widths = [35, 15, 6, 25, 10, 10, 8, 40]
 
-    items = get_rows(limit=None, hashid=hashid)
+    items = get_rows(limit=None, hashid=hashid, include_crossout=True)
 
     output = BytesIO()
     workbook = Workbook(output)
@@ -176,7 +177,7 @@ def export_selection(hashid=''):
     # Add header row to workbook
     format_bold = workbook.add_format({'bold': True})
     for j, colname in enumerate(export_cols):
-        worksheet.write(0, j, colname, format_bold)
+        worksheet.write(0, j, 'Closed' if colname == 'Crossout' else colname, format_bold)
         worksheet.set_column(j, j, export_col_widths[j])
 
     header_offset = 1

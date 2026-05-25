@@ -36,6 +36,8 @@
           allLayerGroups.push(visitedLayer);
           var unvisitedLayer = L.layerGroup();
           allLayerGroups.push(unvisitedLayer);
+          var closedLayer = L.layerGroup();
+          allLayerGroups.push(closedLayer);
           {# feature group needed for getBounds() #}
           var allMarkerGroup = L.featureGroup();
           allLayerGroups.push(allMarkerGroup);
@@ -70,7 +72,9 @@
             .on('click', clickselect)
             .addTo(allMarkerGroup);           
 
-            {%+ if marker['color']|safe == "'green'" -%}
+            {%+ if marker['color']|safe == "'red'" -%}
+                M.addTo(closedLayer);
+            {%+ elif marker['color']|safe == "'green'" -%}
                 M.addTo(visitedLayer);
             {%+ else -%}
                 M.addTo(unvisitedLayer);
@@ -86,6 +90,7 @@
           controlBox.addBaseLayer(OpenStreetMap, "map style 2");
           controlBox.addOverlay(visitedLayer, "visited");
           controlBox.addOverlay(unvisitedLayer, "unvisited");
+          controlBox.addOverlay(closedLayer, "closed");
           controlBox.addTo(map);
           {# https://github.com/domoritz/leaflet-locatecontrol #}
           var lc = L.control.locate({
