@@ -7,3 +7,4 @@ hashids
 flask-table
 xlsxwriter
 gunicorn
+python-dotenv

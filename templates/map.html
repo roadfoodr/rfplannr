@@ -25,18 +25,23 @@
         {# see https://stackoverflow.com/questions/21626048/unable-to-pass-jinja2-variables-into-javascript-snippet #}
         <script type="text/javascript">
           const table_url = JSON.parse(
-              '{{url_for('table_selection', hashid='', _external=True) | tojson}}');
+              '{{table_url | tojson}}');
           const home_url = JSON.parse(
-              '{{url_for('home_page') | tojson}}');
+              '{{home_url | tojson}}');
         </script>
         <script src="{{ url_for('static', filename='js/ui_commands.js') }}" /></script>
         <script>
           var MOBILE = L.Browser.mobile;
           var _lastMobileTap = 0;
+          {% if personal_mode %}
           var visitedLayer = L.layerGroup();
           allLayerGroups.push(visitedLayer);
           var unvisitedLayer = L.layerGroup();
           allLayerGroups.push(unvisitedLayer);
+          {% else %}
+          var roadfoodLayer = L.layerGroup();
+          allLayerGroups.push(roadfoodLayer);
+          {% endif %}
           var closedLayer = L.layerGroup();
           allLayerGroups.push(closedLayer);
           {# feature group needed for getBounds() #}
@@ -86,24 +91,34 @@
             .on('click', MOBILE ? function(){} : clickselect)
             .addTo(allMarkerGroup);           
 
-            {%+ if marker['color']|safe == "'red'" -%}
+            {%+ if marker['layer'] == "closed" -%}
                 M.addTo(closedLayer);
-            {%+ elif marker['color']|safe == "'green'" -%}
+            {%+ elif marker['layer'] == "visited" -%}
                 M.addTo(visitedLayer);
-            {%+ else -%}
+            {%+ elif marker['layer'] == "unvisited" -%}
                 M.addTo(unvisitedLayer);
+            {%+ else -%}
+                M.addTo(roadfoodLayer);
             {% endif %}
           
           {% endfor %}
           
+          {% if personal_mode %}
           visitedLayer.addTo(map);
           unvisitedLayer.addTo(map);
+          {% else %}
+          roadfoodLayer.addTo(map);
+          {% endif %}
           
           controlBox = L.control.layers(null, null, { collapsed: false});
           controlBox.addBaseLayer(CartoDB_Voyager, "map style 1");
           controlBox.addBaseLayer(OpenStreetMap, "map style 2");
+          {% if personal_mode %}
           controlBox.addOverlay(visitedLayer, "visited");
           controlBox.addOverlay(unvisitedLayer, "unvisited");
+          {% else %}
+          controlBox.addOverlay(roadfoodLayer, "roadfood");
+          {% endif %}
           controlBox.addOverlay(closedLayer, "closed");
           controlBox.addTo(map);
           {# https://github.com/domoritz/leaflet-locatecontrol #}

@@ -1,5 +1,6 @@
 from flask import Flask, g, redirect, render_template, request, url_for, send_file
 from flask_talisman import Talisman
+from dotenv import load_dotenv
 import os
 import sqlite3
 # import sys
@@ -12,12 +13,17 @@ from io import BytesIO
 from datetime import date
 
 
+load_dotenv()
 app = Flask(__name__)
 # Wrap Flask app with Talisman
 Talisman(app, content_security_policy=None)
 app.app_context().push()
 # app.secret_key = os.environ.get('SECRET_KEY', 'dev')
 GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'dev')
+PERSONAL_MODE_PATH = os.environ.get('PERSONAL_MODE_PATH', '').strip('/')
+if PERSONAL_MODE_PATH and not re.fullmatch(r'[A-Za-z0-9_-]+', PERSONAL_MODE_PATH):
+    raise ValueError('PERSONAL_MODE_PATH must be one URL segment')
+
 @app.context_processor
 def inject_global_vars():
     return {'GA_TRACKING_ID': GA_TRACKING_ID}
@@ -38,6 +44,14 @@ def make_hashid(ids):
 def decode_hashid(hashid):
     ids = hashids.decode(hashid)
     return ids
+
+def parse_state_filter():
+    state_string = request.form['submit-states'].upper()
+    states = re.split('[^A-Z]', state_string)
+    return list(filter(None, states))
+
+def mode_endpoint(endpoint, personal_mode=False):
+    return f'personal_{endpoint}' if personal_mode else endpoint
 
 #%% DB handling
 
@@ -98,52 +112,81 @@ def get_states(hashid=None):
 
 @app.route('/')
 def home_page():
-    return render_template('index.html')
+    return render_home(personal_mode=False)
 
-@app.route('/map', methods=['GET'])
-def root(states=None, limit=None, hashid=None):
+def render_home(personal_mode=False):
+    return render_template(
+        'index.html',
+        map_form_url=url_for(mode_endpoint('map_page', personal_mode)))
+
+def render_map(states=None, limit=None, hashid=None, personal_mode=False):
     items = get_rows(states, limit, hashid, include_crossout=True)
     goog_prefix = 'https://google.com/search?q='
-    markers = [{
-                'ID': item['ID'],
-                'lat': item['lat'],
-                'lon': item['long'],
-                'popup': f"<a href='{goog_prefix}{urlparse.quote_plus(item['Restaurant'])}"
-                         f"+{urlparse.quote_plus(item['City'])}"
-                         f"+{urlparse.quote_plus(item['State'])}"
-                         f"' target='_blank'>"
-                         f"<strong>{item['Restaurant']}</strong>"
-                         f"</a>"
-                         f"<br>{item['City']}, {item['State']}"
-                         f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}"
-                         f"{'<br><em>Roadfoodr Recommended</em>' if item['Recommend'] == 'y' else ''}"
-                         f"{'<br><strong>Permanently Closed</strong>' if item['Crossout'] == 'y' else ''}",
-                'color': "'red'" if item['Crossout'] == 'y' else ("'green'" if item['Checkmark'] == 'y' else "'royalblue'"),
-                'honor-roll': item['Honor Roll'],
-                'recommended': item['Recommend'],
-                'closed': item['Crossout']
-                } for item in items if item['lat'] ]
-    return render_template('map.html', markers=markers)
+    markers = []
+    for item in items:
+        if not item['lat']:
+            continue
 
-@app.route('/map', methods=['POST'])
-def filter_states():
-    state_string = request.form['submit-states'].upper()
-    states = re.split('[^A-Z]', state_string)
-    states = list(filter(None, states))
-    return root(states=states)
+        is_closed = item['Crossout'] == 'y'
+        is_visited = item['Checkmark'] == 'y'
+        if is_closed:
+            color = "'red'"
+            layer = 'closed'
+        elif personal_mode and is_visited:
+            color = "'green'"
+            layer = 'visited'
+        else:
+            color = "'royalblue'"
+            layer = 'unvisited' if personal_mode else 'roadfood'
 
-@app.route('/map')
-def recall_selection_all(hashid='ALL'):
-    return recall_selection(hashid)
+        markers.append({
+            'ID': item['ID'],
+            'lat': item['lat'],
+            'lon': item['long'],
+            'popup': f"<a href='{goog_prefix}{urlparse.quote_plus(item['Restaurant'])}"
+                     f"+{urlparse.quote_plus(item['City'])}"
+                     f"+{urlparse.quote_plus(item['State'])}"
+                     f"' target='_blank'>"
+                     f"<strong>{item['Restaurant']}</strong>"
+                     f"</a>"
+                     f"<br>{item['City']}, {item['State']}"
+                     f"{'<br><em>Roadfood Honor Roll</em>' if item['Honor Roll'] == 'y' else ''}"
+                     f"{'<br><em>Roadfoodr Recommended</em>' if item['Recommend'] == 'y' else ''}"
+                     f"{'<br><strong>Permanently Closed</strong>' if is_closed else ''}",
+            'color': color,
+            'layer': layer,
+            'honor-roll': item['Honor Roll'],
+            'recommended': item['Recommend'],
+            'closed': item['Crossout']
+        })
+    table_url = url_for(
+        mode_endpoint('table_selection_all', personal_mode),
+        _external=True).rstrip('/') + '/'
+    return render_template(
+        'map.html',
+        markers=markers,
+        personal_mode=personal_mode,
+        table_url=table_url,
+        home_url=url_for(mode_endpoint('home_page', personal_mode)))
+
+@app.route('/map', methods=['GET', 'POST'])
+def map_page():
+    states = parse_state_filter() if request.method == 'POST' else None
+    return render_map(states=states, personal_mode=False)
+
 @app.route('/map/<string:hashid>')
 def recall_selection(hashid=''):
-    return root(states=None, limit=None, hashid=hashid)
+    return render_map(states=None, limit=None, hashid=hashid, personal_mode=False)
 
 @app.route('/table')
 def table_selection_all(hashid='ALL'):
-    return table_selection(hashid)
+    return render_table(hashid=hashid, personal_mode=False)
+
 @app.route('/table/<string:hashid>')
 def table_selection(hashid=''):
+    return render_table(hashid=hashid, personal_mode=False)
+
+def render_table(hashid='', personal_mode=False):
     table_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Notes']
 
     ItemTable = create_table('ItemTable')
@@ -151,18 +194,31 @@ def table_selection(hashid=''):
         ItemTable.add_column(col_name, Col(col_name))
     ItemTable.add_column('Crossout', Col('Closed'))
 
-    items = get_rows(limit=None, hashid=hashid, include_crossout=True) 
-    table = ItemTable(items, table_id='data', 
+    items = get_rows(limit=None, hashid=hashid, include_crossout=True)
+    table = ItemTable(items, table_id='data',
                       classes=['table', 'table-striped'],
                       thead_classes=['thead-dark'])
 
-    return render_template("table_view.html", hashid=hashid, table=table)
+    return render_template(
+        'table_view.html',
+        hashid=hashid,
+        table=table,
+        map_permalink_url=url_for(
+            mode_endpoint('recall_selection', personal_mode), hashid=hashid),
+        table_permalink_url=url_for(
+            mode_endpoint('table_selection', personal_mode), hashid=hashid),
+        export_url=url_for(
+            mode_endpoint('export_selection', personal_mode), hashid=hashid))
 
 @app.route('/export')
-def export_selection_all(hashid='ALL'):   
-    return export_selection(hashid)
+def export_selection_all(hashid='ALL'):
+    return render_export(hashid=hashid, personal_mode=False)
+
 @app.route('/export/<string:hashid>')
 def export_selection(hashid=''):
+    return render_export(hashid=hashid, personal_mode=False)
+
+def render_export(hashid='', personal_mode=False):
     export_cols = ['Restaurant', 'City', 'State', 'Address', 'Honor Roll', 'Recommend', 'Crossout', 'Notes']
     export_col_widths = [35, 15, 6, 25, 10, 10, 8, 40]
 
@@ -187,14 +243,20 @@ def export_selection(hashid=''):
 
     hashid = 'ALL' if not hashid else hashid
     worksheet = workbook.add_worksheet('Permalinks')
-    
+
     distinct_states = get_states(hashid)
     worksheet.write(0, 0, "States represented in this selection:")
-    worksheet.write(1, 0, ", ".join(distinct_states))       
+    worksheet.write(1, 0, ", ".join(distinct_states))
     worksheet.write(3, 0, "Permalink to map view for this selection:")
-    worksheet.write(4, 0, url_for('recall_selection', hashid=hashid, _external=True))       
+    worksheet.write(4, 0, url_for(
+        mode_endpoint('recall_selection', personal_mode),
+        hashid=hashid,
+        _external=True))
     worksheet.write(6, 0, "Permalink to table view for this selection:")
-    worksheet.write(7, 0, url_for('table_selection', hashid=hashid, _external=True))
+    worksheet.write(7, 0, url_for(
+        mode_endpoint('table_selection', personal_mode),
+        hashid=hashid,
+        _external=True))
 
     workbook.close()
     output.seek(0)
@@ -212,11 +274,64 @@ def export_selection(hashid=''):
             states_string_suffix = '-plus'
             distinct_states = distinct_states[:max_filename_states]
         states_string = "-".join(distinct_states) + states_string_suffix
-    
+
     return send_file(output,
                      download_name=f'Roadfood_{date_string}-{states_string}.xlsx',
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True)
+
+if PERSONAL_MODE_PATH:
+    def personal_home_page():
+        return render_home(personal_mode=True)
+
+    def personal_map_page():
+        states = parse_state_filter() if request.method == 'POST' else None
+        return render_map(states=states, personal_mode=True)
+
+    def personal_recall_selection(hashid=''):
+        return render_map(states=None, limit=None, hashid=hashid, personal_mode=True)
+
+    def personal_table_selection_all(hashid='ALL'):
+        return render_table(hashid=hashid, personal_mode=True)
+
+    def personal_table_selection(hashid=''):
+        return render_table(hashid=hashid, personal_mode=True)
+
+    def personal_export_selection_all(hashid='ALL'):
+        return render_export(hashid=hashid, personal_mode=True)
+
+    def personal_export_selection(hashid=''):
+        return render_export(hashid=hashid, personal_mode=True)
+
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}',
+        endpoint='personal_home_page',
+        view_func=personal_home_page)
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/map',
+        endpoint='personal_map_page',
+        view_func=personal_map_page,
+        methods=['GET', 'POST'])
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/map/<string:hashid>',
+        endpoint='personal_recall_selection',
+        view_func=personal_recall_selection)
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/table',
+        endpoint='personal_table_selection_all',
+        view_func=personal_table_selection_all)
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/table/<string:hashid>',
+        endpoint='personal_table_selection',
+        view_func=personal_table_selection)
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/export',
+        endpoint='personal_export_selection_all',
+        view_func=personal_export_selection_all)
+    app.add_url_rule(
+        f'/{PERSONAL_MODE_PATH}/export/<string:hashid>',
+        endpoint='personal_export_selection',
+        view_func=personal_export_selection)
 
 @app.errorhandler(404)
 def invalid_route(e):
